@@ -57,10 +57,10 @@ class KnowledgeGraphMasteryAgent:
     """
     
     def __init__(self, 
-                 problems_file: str = "data/problems.json",
-                 knowledge_graph_file: str = "data/knowledge_graph.json",
+                 problems_file: str = "problems.json",
+                 knowledge_graph_file: str = "knowledge_graph.json",
                  user_id: str = None):
-        """Initialize the mastery agent with LangChain"""
+        """Initialize the mastery agent  with LangChain"""
         self.problems_file = problems_file
         self.knowledge_graph_file = knowledge_graph_file
         
