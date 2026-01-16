@@ -38,7 +38,8 @@ if not st.session_state.session_started:
     # Create a form for user ID input
     with st.form("user_id_form"):
         user_id = st.text_input("Enter your User ID:", placeholder="e.g., student123")
-        topic = st.text_input("Enter Subtopic", placeholder="e.g., INNER JOIN, OUTER JOIN, CROSS JOIN, or SELF JOIN")
+        topic = "inner join"
+        # topic = st.text_input("Enter Subtopic", placeholder="e.g., INNER JOIN, OUTER JOIN, CROSS JOIN, or SELF JOIN")
         submit_button = st.form_submit_button("Start Session")
     # Display welcome message after form submission
     if submit_button:
