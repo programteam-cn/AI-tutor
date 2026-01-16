@@ -1,0 +1,298 @@
+{
+    "course_id": "sql_joins_poc",
+    "course_name": "SQL JOINs - POC Course",
+    "version": "1.0",
+    "description": "Knowledge graph for SQL JOINs module covering INNER JOIN, OUTER JOIN, CROSS JOIN, and SELF JOIN",
+    "topics": [
+        {
+            "topic_id": "joins",
+            "topic_name": "SQL JOINs",
+            "description": "Comprehensive coverage of SQL JOIN operations including INNER, OUTER, CROSS, and SELF joins",
+            "order": 1,
+            "prerequisites": [
+                "select_basics",
+                "filtering"
+            ],
+            "subtopics": [
+                {
+                    "subtopic_id": "inner_join",
+                    "subtopic_name": "INNER JOIN",
+                    "description": "Joining tables to return only rows with matching values in both tables",
+                    "order": 1,
+                    "prerequisites": [],
+                    "recommended_learning_order": "1 → 2 → 3 → 4 → 5",
+                    "clusters": [
+                        {
+                            "cluster_id": "inner_c1",
+                            "cluster_name": "Simple Join (Core Syntax Test)",
+                            "description": "Construct a valid INNER JOIN query that links two tables using a Primary Key–Foreign Key relationship. Includes selecting correct join columns, writing an equality-based ON clause, and producing a result set containing only rows with matching key values.",
+                            "complexity_level": 1,
+                            "mastery_threshold": 0.8,
+                            "learning_objective": "The learner can construct a valid INNER JOIN query that links two tables using a Primary Key–Foreign Key relationship.",
+                            "skills_tested": [
+                                "JOIN syntax",
+                                "ON clause",
+                                "PK-FK relationships",
+                                "Equality-based joins"
+                            ],
+                            "video_url": null,
+                            "video_title": "Introduction to INNER JOIN Syntax"
+                        },
+                        {
+                            "cluster_id": "inner_c2",
+                            "cluster_name": "Complex Join Condition (Operator Test)",
+                            "description": "Construct an INNER JOIN that uses comparison operators such as <, >, or BETWEEN in the ON clause to perform non-equijoins. Identify when range or interval matching is required and correctly interpret how the join condition affects the resulting dataset.",
+                            "complexity_level": 2,
+                            "mastery_threshold": 0.8,
+                            "learning_objective": "The learner can construct an INNER JOIN that uses comparison operators in the ON clause to perform non-equijoins.",
+                            "skills_tested": [
+                                "Non-equijoin",
+                                "Comparison operators",
+                                "Range matching",
+                                "BETWEEN in ON clause"
+                            ]
+                        },
+                        {
+                            "cluster_id": "inner_c3",
+                            "cluster_name": "Post-Join Filtering (WHERE Clause Test)",
+                            "description": "Apply the WHERE clause to filter the result set after the INNER JOIN is performed. Distinguish conditions that belong in the ON clause from those that belong in the WHERE clause and accurately filter rows using columns from either table in the joined output.",
+                            "complexity_level": 3,
+                            "mastery_threshold": 0.8,
+                            "learning_objective": "The learner can apply the WHERE clause to filter the result set after the INNER JOIN is performed.",
+                            "skills_tested": [
+                                "WHERE vs ON clause",
+                                "Post-join filtering",
+                                "Filter placement",
+                                "Multi-table column filtering"
+                            ]
+                        },
+                        {
+                            "cluster_id": "inner_c4",
+                            "cluster_name": "Multi-Table Join (Chained Join Test)",
+                            "description": "Construct an INNER JOIN query that links three or more tables using multiple ON clauses. Includes selecting correct join paths, managing sequential join conditions without logical conflict, and using table aliases to maintain clarity in complex, normalized schemas.",
+                            "complexity_level": 4,
+                            "mastery_threshold": 0.8,
+                            "learning_objective": "The learner can construct an INNER JOIN query that links three or more tables using multiple ON clauses.",
+                            "skills_tested": [
+                                "Multi-table joins",
+                                "Table aliases",
+                                "Join paths",
+                                "Sequential join conditions"
+                            ]
+                        },
+                        {
+                            "cluster_id": "inner_c5",
+                            "cluster_name": "Join with Aggregation (GROUP BY Test)",
+                            "description": "Combine INNER JOIN logic with GROUP BY and aggregate functions such as SUM, COUNT, or AVG to produce summarized results. Identify which columns must be grouped, apply aggregates to joined data, and use the HAVING clause to filter groups based on aggregated values.",
+                            "complexity_level": 5,
+                            "mastery_threshold": 0.8,
+                            "learning_objective": "The learner can combine INNER JOIN logic with GROUP BY and aggregate functions to produce summarized results.",
+                            "skills_tested": [
+                                "GROUP BY with JOIN",
+                                "Aggregate functions",
+                                "HAVING clause",
+                                "Grouping key selection"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "subtopic_id": "outer_join",
+                    "subtopic_name": "OUTER JOIN",
+                    "description": "Joining tables while preserving unmatched rows from one or both tables",
+                    "order": 2,
+                    "prerequisites": [
+                        "inner_join"
+                    ],
+                    "recommended_learning_order": "1 → 2 → 3 → 4 → 5",
+                    "clusters": [
+                        {
+                            "cluster_id": "outer_c1",
+                            "cluster_name": "Simple Join (Core Syntax & Null Handling Test)",
+                            "description": "Construct outer join queries and accurately predict how row preservation operates in each join direction. Includes determining which table's rows will be fully retained, identifying where NULL values will appear for unmatched records, and selecting appropriate join columns.",
+                            "complexity_level": 1,
+                            "mastery_threshold": 0.8,
+                            "learning_objective": "The learner can construct outer join queries and accurately predict how row preservation operates in each join direction.",
+                            "skills_tested": [
+                                "LEFT/RIGHT/FULL OUTER JOIN syntax",
+                                "Row preservation",
+                                "NULL value placement",
+                                "Join direction"
+                            ]
+                        },
+                        {
+                            "cluster_id": "outer_c2",
+                            "cluster_name": "Post-Join Filtering (WHERE Clause and Anti-Join Test)",
+                            "description": "Apply filtering techniques to isolate matched or unmatched records after performing an outer join. Includes using NULL-based conditions to identify exclusive records and distinguishing between conditions applied in the join clause and those applied after the join is evaluated.",
+                            "complexity_level": 2,
+                            "mastery_threshold": 0.8,
+                            "learning_objective": "The learner can apply filtering techniques to isolate matched or unmatched records after performing an outer join.",
+                            "skills_tested": [
+                                "Anti-join pattern",
+                                "IS NULL filtering",
+                                "Exclusive record identification",
+                                "Post-join vs join-time conditions"
+                            ]
+                        },
+                        {
+                            "cluster_id": "outer_c3",
+                            "cluster_name": "Complex Join Condition (Operator Test)",
+                            "description": "Use comparison operators in outer join conditions and interpret how these affect row preservation and NULL placement. Includes applying range-based or non-equality logic while ensuring the expected preservation rules remain intact.",
+                            "complexity_level": 3,
+                            "mastery_threshold": 0.8,
+                            "learning_objective": "The learner can use comparison operators in outer join conditions and interpret how these affect row preservation and NULL placement.",
+                            "skills_tested": [
+                                "Non-equality outer joins",
+                                "Range-based conditions",
+                                "Preservation with operators",
+                                "NULL behavior with comparisons"
+                            ]
+                        },
+                        {
+                            "cluster_id": "outer_c4",
+                            "cluster_name": "Multi-Table Join (Chained Outer Join Test)",
+                            "description": "Construct multi-table queries that incorporate outer joins and accurately track how unmatched rows and NULL values propagate across multiple join steps. Includes selecting appropriate join paths, managing multiple join conditions, and interpreting how earlier join outcomes influence later results.",
+                            "complexity_level": 4,
+                            "mastery_threshold": 0.8,
+                            "learning_objective": "The learner can construct multi-table queries that incorporate outer joins and accurately track NULL propagation.",
+                            "skills_tested": [
+                                "Chained outer joins",
+                                "NULL propagation",
+                                "Join order effects",
+                                "Mixed join types"
+                            ]
+                        },
+                        {
+                            "cluster_id": "outer_c5",
+                            "cluster_name": "Join with Aggregation (Grouping and Counting Test)",
+                            "description": "Summarize data produced by outer joins using grouping and aggregation while correctly handling NULL values introduced by row preservation. Includes selecting appropriate grouping keys, understanding how aggregates behave with NULLs, and applying expressions that unify grouping keys.",
+                            "complexity_level": 5,
+                            "mastery_threshold": 0.8,
+                            "learning_objective": "The learner can summarize data produced by outer joins while correctly handling NULL values in aggregations.",
+                            "skills_tested": [
+                                "Aggregation with NULLs",
+                                "COALESCE for grouping",
+                                "COUNT(*) vs COUNT(column)",
+                                "NULL-aware aggregates"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "subtopic_id": "cross_join",
+                    "subtopic_name": "CROSS JOIN",
+                    "description": "Producing the Cartesian product of two tables",
+                    "order": 3,
+                    "prerequisites": [
+                        "inner_join"
+                    ],
+                    "recommended_learning_order": "1 → 2",
+                    "clusters": [
+                        {
+                            "cluster_id": "cross_c1",
+                            "cluster_name": "Core Syntax and Cartesian Product Test",
+                            "description": "Construct a CROSS JOIN and explain that it produces the Cartesian product of two tables. Includes using the CROSS JOIN keyword correctly, recognizing that no ON clause is used, and accurately calculating the number of rows generated by multiplying the row counts of the input tables.",
+                            "complexity_level": 1,
+                            "mastery_threshold": 0.8,
+                            "learning_objective": "The learner can construct a CROSS JOIN and explain that it produces the Cartesian product of two tables.",
+                            "skills_tested": [
+                                "CROSS JOIN syntax",
+                                "Cartesian product concept",
+                                "Row count calculation",
+                                "No ON clause usage"
+                            ]
+                        },
+                        {
+                            "cluster_id": "cross_c2",
+                            "cluster_name": "Implicit Cross Join Recognition Test",
+                            "description": "Identify when a query produces an implicit CROSS JOIN, such as when tables are listed without a join condition or when an INNER JOIN is written without a valid ON clause. Includes recognizing accidental Cartesian products and correcting the join logic to prevent unintended results.",
+                            "complexity_level": 2,
+                            "mastery_threshold": 0.8,
+                            "learning_objective": "The learner can identify when a query produces an implicit CROSS JOIN and correct accidental Cartesian products.",
+                            "skills_tested": [
+                                "Implicit cross join detection",
+                                "Missing ON clause identification",
+                                "Accidental Cartesian prevention",
+                                "Query correction"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "subtopic_id": "self_join",
+                    "subtopic_name": "SELF JOIN",
+                    "description": "Joining a table to itself for hierarchical or comparative queries",
+                    "order": 4,
+                    "prerequisites": [
+                        "inner_join",
+                        "outer_join"
+                    ],
+                    "recommended_learning_order": "1 → 2 → 3",
+                    "clusters": [
+                        {
+                            "cluster_id": "self_c1",
+                            "cluster_name": "Alias and Setup Test",
+                            "description": "Construct a self join using inner or outer join logic by joining a table to itself with required table aliases. Includes writing a valid ON clause that links rows within the same table and referencing columns unambiguously using the assigned aliases.",
+                            "complexity_level": 1,
+                            "mastery_threshold": 0.8,
+                            "learning_objective": "The learner can construct a self join by joining a table to itself with required table aliases.",
+                            "skills_tested": [
+                                "Self join syntax",
+                                "Table aliasing",
+                                "Same-table ON clause",
+                                "Unambiguous column references"
+                            ]
+                        },
+                        {
+                            "cluster_id": "self_c2",
+                            "cluster_name": "Hierarchical Query Test",
+                            "description": "Use a self join to query hierarchical or parent–child relationships stored within a single table. Includes joining a self-referencing foreign key to its corresponding primary key and interpreting the resulting parent and child rows.",
+                            "complexity_level": 2,
+                            "mastery_threshold": 0.8,
+                            "learning_objective": "The learner can use a self join to query hierarchical or parent–child relationships stored within a single table.",
+                            "skills_tested": [
+                                "Hierarchical data",
+                                "Parent-child relationships",
+                                "Self-referencing FK",
+                                "Manager-employee pattern"
+                            ]
+                        },
+                        {
+                            "cluster_id": "self_c3",
+                            "cluster_name": "Intra-Table Comparison Test",
+                            "description": "Compare rows within the same table using a self join combined with non-equality conditions. Includes preventing rows from matching to themselves and applying comparison logic to identify similarities, differences, or relationships between distinct rows.",
+                            "complexity_level": 3,
+                            "mastery_threshold": 0.8,
+                            "learning_objective": "The learner can compare rows within the same table using a self join with non-equality conditions.",
+                            "skills_tested": [
+                                "Intra-table comparison",
+                                "Self-exclusion (a.id <> b.id)",
+                                "Non-equality self joins",
+                                "Row relationship detection"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "metadata": {
+        "total_subtopics": 4,
+        "total_clusters": 15,
+        "cluster_distribution": {
+            "inner_join": 5,
+            "outer_join": 5,
+            "cross_join": 2,
+            "self_join": 3
+        },
+        "complexity_distribution": {
+            "level_1": 4,
+            "level_2": 4,
+            "level_3": 3,
+            "level_4": 2,
+            "level_5": 2
+        },
+        "source_document": "SQL_AI_Mentor.pdf",
+        "questions_link": "Cluster wise mapping of Questions - Link (as referenced in source)"
+    }
+}

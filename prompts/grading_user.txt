@@ -1,0 +1,21 @@
+You are an expert SQL educator. Grade this student's SQL answer.
+
+QUESTION:
+{question_description}
+
+STUDENT'S ANSWER:
+{user_answer}
+
+GRADING CRITERIA:
+1. Does the SQL syntax appear correct?
+2. Does the query logically solve the problem described?
+3. Are the table joins appropriate?
+4. Are the selected columns correct?
+
+Provide your assessment as JSON:
+{{
+  "is_correct": <true/false>,
+  "feedback": "<brief feedback on correctness>",
+  "explanation": "<what was good or what needs improvement>",
+  "confidence": <0.0-1.0, how confident you are in this grading>
+}}
