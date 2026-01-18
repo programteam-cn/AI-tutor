@@ -80,7 +80,7 @@ class KnowledgeGraphMasteryAgent:
         # Initialize LangChain ChatOpenAI model
         self.llm = ChatOpenAI(
             model="gpt-4.1",
-            temperature=0.2,
+            temperature=0.5,
             api_key=os.getenv("OPENAI_API_KEY")
         )
         
@@ -384,6 +384,13 @@ class KnowledgeGraphMasteryAgent:
                 "correct_attempts": current_state.correct_attempts,
                 "accuracy_pct": (current_state.correct_attempts / current_state.total_attempts * 100)
             })
+            
+            # Debug: Print the LLM assessment response
+            print(f"\n🤖 LLM Assessment Response:")
+            print(f"   Mastery Probability: {assessment.get('mastery_probability', 'N/A')}")
+            print(f"   Confidence Level: {assessment.get('confidence_level', 'N/A')}")
+            print(f"   Reasoning: {assessment.get('reasoning', 'N/A')}")
+            print(f"   Total Attempts: {current_state.total_attempts}, Correct: {current_state.correct_attempts}")
             
             # Update mastery state based on assessment
             current_state.mastery_probability = assessment['mastery_probability']

@@ -217,13 +217,11 @@ Return ONLY the JSON object, nothing else."""
                     "last_updated": datetime.now().isoformat()
                 }
             else:
-                # Average with previous score
-                prev_score = self.session_data["mastery_tracking"]["concepts"][skill]["mastery_score"]
+                # Use the latest score directly (concepts are part of holistic LLM assessment)
                 prev_attempts = self.session_data["mastery_tracking"]["concepts"][skill]["attempts"]
-                new_score = (prev_score * prev_attempts + score) / (prev_attempts + 1)
                 
                 self.session_data["mastery_tracking"]["concepts"][skill] = {
-                    "mastery_score": new_score,
+                    "mastery_score": score,
                     "attempts": prev_attempts + 1,
                     "last_updated": datetime.now().isoformat()
                 }
@@ -239,10 +237,12 @@ Return ONLY the JSON object, nothing else."""
                 "last_updated": datetime.now().isoformat()
             }
         else:
-            prev_score = self.session_data["mastery_tracking"]["subtopics"][subtopic]["mastery_score"]
             prev_attempts = self.session_data["mastery_tracking"]["subtopics"][subtopic]["attempts"]
-            new_score = (prev_score * prev_attempts + subtopic_mastery) / (prev_attempts + 1)
             new_attempts = prev_attempts + 1
+            
+            # Use the latest LLM assessment directly (LLM already considers full history)
+            # No need to average - the LLM assessment is holistic and considers all attempts
+            new_score = subtopic_mastery
             
             # Only allow mastery_achieved if at least 3 attempts
             mastery_achieved = mastery_assessment.get("mastery_achieved", False) and new_attempts >= 3
