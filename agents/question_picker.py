@@ -22,6 +22,9 @@ class QuestionPickerAgent:
         self.asked_problems = set()  # Track problems already asked in current subtopic
         self.student_agent = student_agent  # Reference to student profile agent for mastery reset
 
+
+    ############ Load Knowledge Graph and Problems ############
+
     def _load_knowledge_graph(self) -> Dict[str, Any]:
         """Load the knowledge graph from JSON file."""
         with open(self.knowledge_graph_path, 'r') as f:
@@ -36,6 +39,9 @@ class QuestionPickerAgent:
         """Get list of problems for a given cluster_id."""
         return [p for p in self.problems if p.get("cluster_id") == cluster_id]
     
+
+    ################## Picking Initial Question ##################
+
     def generate_initial_question(self) -> Dict[str, Any]:
         """ Generate initial question for a new student."""
         initial_difficulty = config_manager.config.default_difficulty.lower()
@@ -88,7 +94,7 @@ class QuestionPickerAgent:
             "completed": False
         }
 
-
+    
     def get_next_question(self, student_profile: Dict[str, Any]) -> Dict[str, Any]:
         """
         Pick the next appropriate question based on student profile and mastery scores.

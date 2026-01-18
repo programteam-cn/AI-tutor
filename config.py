@@ -1,7 +1,7 @@
 """ Config file for the AI Tutoring System app """
 
 llm = {
-    "model_name": "gpt-4.1-mini",
+    "model_name": "gpt-4.1",
     "temperature": 0.7,
     "max_tokens": 1500,
 }

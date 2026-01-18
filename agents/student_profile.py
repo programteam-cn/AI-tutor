@@ -73,10 +73,18 @@ class StudentProfileAgent:
         except Exception as e:
             print(f"Error saving user data: {e}")
     
-    def save_question_data(self, question_data: Dict[str, Any], user_answer: str, classification: Dict[str, Any], evaluation: Dict[str, Any] = None):
-        """Save question, answer, classification, evaluation, and calculate mastery to user data."""
-        # Calculate mastery scores
-        mastery_assessment = self._calculate_mastery_scores(question_data, user_answer, evaluation)
+    def save_question_data(self, question_data: Dict[str, Any], user_answer: str, classification: Dict[str, Any], evaluation: Dict[str, Any] = None, mastery_assessment: Dict[str, Any] = None):
+        """Save question, answer, classification, evaluation, and mastery assessment to user data."""
+        # Use provided mastery assessment or create a default one
+        if mastery_assessment is None:
+            mastery_assessment = {
+                "mastery_probability": 0.0,
+                "concept_mastery": {},
+                "subtopic_mastery": 0.0,
+                "confidence_level": "low",
+                "feedback": "No mastery assessment provided",
+                "mastery_achieved": False
+            }
         
         question_record = {
             "timestamp": datetime.now().isoformat(),
@@ -159,123 +167,14 @@ Return ONLY the JSON object, nothing else."""
                 "reasoning": "Error during classification"
             }
     
-    def _calculate_mastery_scores(self, question_data: Dict[str, Any], user_answer: str, evaluation: Dict[str, Any] = None) -> Dict[str, Any]:
-        """Calculate mastery probability and concept understanding using LLM."""
-        cluster_info = question_data.get("cluster_info", {})
-        skills_tested = cluster_info.get("skills_tested", [])
-        subtopic = cluster_info.get("subtopic_name", "Unknown")
-        
-        # Get question history for context - ONLY for current subtopic
+    def get_subtopic_history(self, subtopic: str) -> list:
+        """Get question history for a specific subtopic."""
         all_history = self.session_data.get("questions_history", [])
         history = [
             q for q in all_history 
             if q.get("cluster_info", {}).get("subtopic_name", "") == subtopic
         ]
-        
-        # Calculate basic statistics for CURRENT SUBTOPIC ONLY
-        total_attempts = len(history) + 1  # Current question + previous questions in this subtopic
-        correct_attempts = sum(1 for q in history if q.get("evaluation", {}).get("is_correct", False))
-        if evaluation and evaluation.get("is_correct", False):
-            correct_attempts += 1
-        
-        accuracy = correct_attempts / total_attempts if total_attempts > 0 else 0.0
-        
-        # Prepare history for LLM assessment
-        recent_history = history[-5:] if len(history) > 5 else history
-        history_text = self._format_history_for_mastery(recent_history)
-        
-        # LLM-based mastery assessment
-        prompt = f"""As an expert SQL educator, assess this student's mastery level based on their performance FOR THIS SPECIFIC SUBTOPIC ONLY.
-
-IMPORTANT: This is attempt #{total_attempts} for the subtopic "{subtopic}". Do NOT give high mastery scores with only 1-2 attempts.
-- With 1 attempt: mastery_probability should be LOW (0.0-0.3)
-- With 2 attempts: mastery_probability should be MODERATE at best (0.3-0.6)
-- With 3+ attempts and high accuracy: mastery_probability can be HIGH (0.6-1.0)
-
-Current Question Context:
-- Subtopic: {subtopic}
-- Skills Tested: {', '.join(skills_tested)}
-- Question: {question_data.get('question', '')[:200]}...
-- Student's Answer: {user_answer}
-- Was Correct: {evaluation.get('is_correct', False) if evaluation else 'Unknown'}
-- Score: {evaluation.get('score', 0) if evaluation else 0}/100
-
-Overall Statistics (FOR THIS SUBTOPIC ONLY):
-- Total Attempts: {total_attempts}
-- Correct: {correct_attempts}/{total_attempts}
-- Accuracy: {accuracy:.1%}
-
-Recent Performance History (THIS SUBTOPIC ONLY):
-{history_text}
-
-Analyze the student's understanding and mastery. Return a JSON object with:
-- "mastery_probability": a number between 0.0 and 1.0 representing overall mastery (keep LOW for first 1-2 attempts)
-- "concept_mastery": an object mapping each skill/concept to a mastery score (0.0 to 1.0)
-- "subtopic_mastery": mastery score for the subtopic (0.0 to 1.0) (keep LOW for first 1-2 attempts)
-- "confidence_level": "low", "medium", or "high"
-- "feedback": brief assessment of strengths and areas for improvement
-- "mastery_achieved": boolean, true if mastery_probability >= 0.80 AND at least 3 questions attempted
-
-Return ONLY the JSON object."""
-        
-        try:
-            ai_message = self.model.invoke(prompt)
-            content = ai_message.content if hasattr(ai_message, 'content') else str(ai_message)
-            
-            # Clean up markdown
-            content = content.strip()
-            if content.startswith('```'):
-                lines = content.split('\n')
-                content = '\n'.join(lines[1:-1]) if len(lines) > 2 else content
-                content = content.replace('```json', '').replace('```', '').strip()
-            
-            mastery_data = json.loads(content)
-            
-            # Apply hard caps based on number of attempts to prevent premature high scores
-            if total_attempts == 1:
-                # First attempt: cap at 30%
-                mastery_data["mastery_probability"] = min(mastery_data.get("mastery_probability", 0.0), 0.30)
-                mastery_data["subtopic_mastery"] = min(mastery_data.get("subtopic_mastery", 0.0), 0.30)
-            elif total_attempts == 2:
-                # Second attempt: cap at 50%
-                mastery_data["mastery_probability"] = min(mastery_data.get("mastery_probability", 0.0), 0.50)
-                mastery_data["subtopic_mastery"] = min(mastery_data.get("subtopic_mastery", 0.0), 0.50)
-            
-            # Ensure required fields
-            if "mastery_probability" not in mastery_data:
-                mastery_data["mastery_probability"] = accuracy * 0.8
-            if "concept_mastery" not in mastery_data:
-                mastery_data["concept_mastery"] = {skill: accuracy for skill in skills_tested}
-            if "subtopic_mastery" not in mastery_data:
-                mastery_data["subtopic_mastery"] = accuracy
-            if "confidence_level" not in mastery_data:
-                mastery_data["confidence_level"] = "medium"
-            if "feedback" not in mastery_data:
-                mastery_data["feedback"] = "Continue practicing"
-            if "mastery_achieved" not in mastery_data:
-                # Require at least 3 attempts before allowing mastery
-                mastery_data["mastery_achieved"] = (
-                    mastery_data["mastery_probability"] >= self.mastery_threshold 
-                    and total_attempts >= 3
-                )
-            else:
-                # Override if attempts are less than 3
-                if total_attempts < 3:
-                    mastery_data["mastery_achieved"] = False
-            
-            return mastery_data
-            
-        except Exception as e:
-            print(f"Error calculating mastery: {e}")
-            # Fallback to basic calculation
-            return {
-                "mastery_probability": accuracy * 0.8,
-                "concept_mastery": {skill: accuracy for skill in skills_tested},
-                "subtopic_mastery": accuracy,
-                "confidence_level": "low",
-                "feedback": "Continue practicing to improve understanding",
-                "mastery_achieved": False
-            }
+        return history
     
     def _format_history_for_mastery(self, history: list) -> str:
         """Format recent question history for mastery assessment."""

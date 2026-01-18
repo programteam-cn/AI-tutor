@@ -180,7 +180,8 @@ else:
             if st.button("Submit Answer", type="primary"):
                 if user_answer:
                     with st.spinner("Processing your answer and generating next question..."):
-                        # Classify student based on their answer
+                        # Classify student based on th
+                        
                         classification = st.session_state.student_agent.classify_student(
                             question=question,
                             response=user_answer
@@ -192,13 +193,42 @@ else:
                             user_answer=user_answer,
                             context=question_data
                         )
+                        
+                        # Record the attempt in mastery agent
+                        question_record = {
+                            'problem_id': question_data.get('problem_id'),
+                            'description': question,
+                            'difficulty': cluster_info.get('complexity_level', 3),
+                            'concepts': cluster_info.get('skills_tested', []),
+                            'subtopic_id': st.session_state.mastery_agent.current_subtopic_id
+                        }
+                        
+                        # Record attempt and assess mastery using mastery agent
+                        st.session_state.mastery_agent.record_attempt(
+                            question=question_record,
+                            user_answer=user_answer,
+                            correct_answer="",
+                            evaluation=evaluation  # Pass evaluation result to determine correctness
+                        )
+                        
+                        # Get mastery assessment from mastery agent
+                        mastery_assessment = st.session_state.mastery_agent.assess_mastery_with_llm()
+                        
+                        # Add concept_mastery and subtopic_mastery for compatibility
+                        if 'concept_mastery' not in mastery_assessment:
+                            skills_tested = cluster_info.get('skills_tested', [])
+                            accuracy = evaluation.get('score', 0) / 100.0
+                            mastery_assessment['concept_mastery'] = {skill: accuracy for skill in skills_tested}
+                        if 'subtopic_mastery' not in mastery_assessment:
+                            mastery_assessment['subtopic_mastery'] = mastery_assessment.get('mastery_probability', 0.0)
 
-                        # Save question data to user file (includes mastery calculation)
+                        # Save question data to user file with mastery assessment from mastery agent
                         st.session_state.student_agent.save_question_data(
                             question_data=question_data,
                             user_answer=user_answer,
                             classification=classification,
-                            evaluation=evaluation
+                            evaluation=evaluation,
+                            mastery_assessment=mastery_assessment
                         )
                         
                         # Update tutor state

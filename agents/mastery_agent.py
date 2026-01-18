@@ -368,9 +368,12 @@ Return ONLY the JSON object.
                 'explanation': str(e)
             }
     
-    def record_attempt(self, question: Dict, user_answer: str, correct_answer: str = ""):
+    def record_attempt(self, question: Dict, user_answer: str, correct_answer: str = "", evaluation: Dict = None):
         """Record a learner's attempt for the current subtopic"""
-        if correct_answer:
+        # Use evaluation result if provided, otherwise compare strings
+        if evaluation and 'is_correct' in evaluation:
+            is_correct = evaluation.get('is_correct', False)
+        elif correct_answer:
             is_correct = user_answer.strip().lower() == correct_answer.strip().lower()
         else:
             is_correct = False
@@ -601,6 +604,8 @@ Return ONLY the JSON object.
     
     def get_mastery_report(self) -> Dict:
         """Generate comprehensive mastery report"""
+
+        print("INSIDE GET MASTERY REPORT")
         current_subtopic = self.get_current_subtopic()
         
         if not current_subtopic:
@@ -673,6 +678,12 @@ Return ONLY the JSON object.
         print(f"Mastery Threshold: {self.mastery_threshold:.1%}")
         print(f"Status: {'✓ MASTERED' if current_state.mastery_probability >= self.mastery_threshold else '⏳ In Progress'}")
         print("="*70 + "\n")
+
+
+
+
+
+
 
 
 # ============================================================================
@@ -770,18 +781,13 @@ def run_learning_session():
         print("\n🤖 Grading your answer...")
         grading_result = agent._grade_sql_answer(question, user_answer)
         
-        # Record attempt
-        agent.record_attempt(question, user_answer, "")
-        
-        # Update the last attempt with grading result
-        if current_state.attempts_history:
-            current_state.attempts_history[-1].is_correct = grading_result.get('is_correct', False)
+        # Record attempt with evaluation result
+        agent.record_attempt(question, user_answer, "", evaluation=grading_result)
         
         # Provide immediate feedback
         is_correct = grading_result.get('is_correct', False)
         if is_correct:
             print("\n✅ Correct!")
-            current_state.correct_attempts += 1
         else:
             print("\n❌ Incorrect")
         
