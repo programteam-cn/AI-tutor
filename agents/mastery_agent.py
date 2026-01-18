@@ -122,96 +122,6 @@ class KnowledgeGraphMasteryAgent:
         # Load prompts and create LangChain prompt templates
         self._setup_prompt_templates()
     
-    def evaluate(self, question: str, user_answer: str, context: Optional[Dict] = None) -> Dict:
-        """
-        Evaluate the student's answer against the question.
-        
-        Args:
-            question: The question text.
-            user_answer: The student's SQL query or answer.
-            context: Additional context like table schema or problem description.
-            
-        Returns:
-            Dict containing 'score' (0-100), 'feedback', 'is_correct' (bool), 
-            'weak_concepts', 'missing_concepts', and 'concept_understanding'.
-        """
-        
-        schema_info = ""
-        skills_tested = []
-        if context:
-            # Extract relevant schema info if available in context
-            schema_info = f"\nAdditional Context/Schema: {json.dumps(context, indent=2)}"
-            # Extract skills/concepts being tested
-            cluster_info = context.get('cluster_info', {})
-            skills_tested = cluster_info.get('skills_tested', [])
-
-        skills_context = f"\nConcepts/Skills Being Tested: {', '.join(skills_tested)}" if skills_tested else ""
-
-        prompt = f"""You are an expert SQL tutor. Evaluate the student's answer for the following SQL problem.
-
-Question: {question}
-{schema_info}
-{skills_context}
-
-Student's Answer: {user_answer}
-
-Analyze the student's SQL query for correctness, efficiency, and adherence to standard SQL practices.
-If the answer is a valid SQL query that solves the problem, give a high score.
-If it has syntax errors or logic errors, give a lower score.
-
-IMPORTANT: Identify specific concepts the student is struggling with based on their answer.
-
-Return a JSON object with the following fields:
-- "score": integer from 0 to 100 representing accuracy.
-- "is_correct": boolean, true if the answer is functionally correct.
-- "feedback": a concise explanation of what is right or wrong, and tips for improvement.
-- "weak_concepts": array of specific concepts/skills the student struggled with in this answer (e.g., ["JOIN syntax", "WHERE clause placement", "aggregate functions"])
-- "missing_concepts": array of concepts that should have been used but weren't (e.g., ["INNER JOIN", "GROUP BY"])
-- "concept_understanding": object mapping each tested concept to a score 0.0-1.0 indicating understanding level
-
-Return ONLY the JSON object.
-"""
-        try:
-            ai_message = self.llm.invoke(prompt)
-            content = ai_message.content if hasattr(ai_message, 'content') else str(ai_message)
-            
-            # Clean up potential markdown
-            content = content.strip()
-            if content.startswith('```'):
-                lines = content.split('\n')
-                if len(lines) > 2:
-                    content = '\n'.join(lines[1:-1])
-                content = content.replace('```json', '').replace('```', '').strip()
-                
-            result = json.loads(content)
-            
-            # Ensure required fields exist
-            if "score" not in result:
-                result["score"] = 0
-            if "is_correct" not in result:
-                result["is_correct"] = False
-            if "feedback" not in result:
-                result["feedback"] = "No feedback provided."
-            if "weak_concepts" not in result:
-                result["weak_concepts"] = []
-            if "missing_concepts" not in result:
-                result["missing_concepts"] = []
-            if "concept_understanding" not in result:
-                result["concept_understanding"] = {}
-                
-            return result
-            
-        except Exception as e:
-            print(f"Error evaluating answer: {e}")
-            return {
-                "score": 0,
-                "is_correct": False,
-                "feedback": "Error occurred during evaluation.",
-                "weak_concepts": [],
-                "missing_concepts": [],
-                "concept_understanding": {}
-            }
-        
     def _extract_subtopic_sequence(self) -> List[Dict]:
         """Extract ordered sequence of subtopics from knowledge graph"""
         subtopics = []
@@ -252,7 +162,7 @@ Return ONLY the JSON object.
         # Create chains
         self.grading_chain = self.grading_prompt | self.llm | self.json_parser
         self.assessment_chain = self.assessment_prompt | self.assessment_llm | self.json_parser
-        
+    
     def _load_prompt(self, filename: str) -> str:
         """Load a prompt from a file in the prompts directory"""
         try:
@@ -261,7 +171,7 @@ Return ONLY the JSON object.
         except FileNotFoundError:
             print(f"Warning: prompts/{filename} not found.")
             return ""
-        
+    
     def _load_knowledge_graph(self) -> Dict:
         """Load knowledge graph from JSON file"""
         try:
@@ -348,8 +258,12 @@ Return ONLY the JSON object.
         if not user_answer or user_answer.lower() in ['i dont know', 'idk', 'skip', 'dont know', "i don't know"]:
             return {
                 'is_correct': False,
+                'score': 0,
                 'feedback': 'No valid answer provided.',
-                'explanation': 'Please attempt to write a SQL query.'
+                'explanation': 'Please attempt to write a SQL query.',
+                'weak_concepts': [],
+                'missing_concepts': [],
+                'concept_understanding': {}
             }
         
         try:
@@ -359,13 +273,33 @@ Return ONLY the JSON object.
                 "user_answer": user_answer
             })
             
+            # Ensure all required fields exist with defaults
+            if "score" not in result:
+                result["score"] = 50 if result.get('is_correct', False) else 0
+            if "is_correct" not in result:
+                result["is_correct"] = False
+            if "feedback" not in result:
+                result["feedback"] = "No feedback provided."
+            if "explanation" not in result:
+                result["explanation"] = "No explanation provided."
+            if "weak_concepts" not in result:
+                result["weak_concepts"] = []
+            if "missing_concepts" not in result:
+                result["missing_concepts"] = []
+            if "concept_understanding" not in result:
+                result["concept_understanding"] = {}
+            
             return result
         except Exception as e:
             print(f"Error grading answer: {e}")
             return {
                 'is_correct': False,
+                'score': 0,
                 'feedback': 'Unable to grade automatically.',
-                'explanation': str(e)
+                'explanation': str(e),
+                'weak_concepts': [],
+                'missing_concepts': [],
+                'concept_understanding': {}
             }
     
     def record_attempt(self, question: Dict, user_answer: str, correct_answer: str = "", evaluation: Dict = None):

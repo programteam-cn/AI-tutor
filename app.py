@@ -188,10 +188,15 @@ else:
                         )
                         
                         # Evaluate student Answer using mastery agent
-                        evaluation = st.session_state.mastery_agent.evaluate(
-                            question=question,
-                            user_answer=user_answer,
-                            context=question_data
+                        # Prepare question dict for _grade_sql_answer
+                        question_for_grading = {
+                            'description': question,
+                            'problem_id': question_data.get('problem_id'),
+                            'cluster_info': cluster_info
+                        }
+                        evaluation = st.session_state.mastery_agent._grade_sql_answer(
+                            question=question_for_grading,
+                            user_answer=user_answer
                         )
                         
                         # Record the attempt in mastery agent
