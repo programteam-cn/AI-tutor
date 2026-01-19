@@ -16,7 +16,8 @@ Analyze the student's SQL query for correctness, efficiency, and adherence to st
 If the answer is a valid SQL query that solves the problem, give a high score.
 If it has syntax errors or logic errors, give a lower score.
 
-IMPORTANT: Identify specific concepts the student is struggling with based on their answer.
+IMPORTANT: Only identify weak concepts and missing concepts if the answer is incorrect or has issues.
+For fully correct answers, leave weak_concepts and missing_concepts as empty arrays.
 
 Provide your assessment as JSON:
 {{
@@ -24,7 +25,7 @@ Provide your assessment as JSON:
   "is_correct": <true/false, true if the answer is functionally correct>,
   "feedback": "<brief feedback on correctness and tips for improvement>",
   "explanation": "<detailed explanation of what was good or what needs improvement>",
-  "weak_concepts": [<array of specific concepts/skills the student struggled with, e.g., "JOIN syntax", "WHERE clause placement", "aggregate functions">],
-  "missing_concepts": [<array of concepts that should have been used but weren't, e.g., "INNER JOIN", "GROUP BY">],
+  "weak_concepts": [<array of specific concepts/skills the student struggled with - ONLY if answer is incorrect or score < 80, e.g., "JOIN syntax", "WHERE clause placement">],
+  "missing_concepts": [<array of concepts that should have been used but weren't - ONLY if answer is incorrect or score < 80, e.g., "INNER JOIN", "GROUP BY">],
   "concept_understanding": {{<object mapping each tested concept to a score 0.0-1.0 indicating understanding level>}}
 }}

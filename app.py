@@ -114,23 +114,51 @@ else:
         # Show weak topics
         st.markdown("---")
         st.subheader("⚠️ Areas to Improve")
+        
+        # Show latest weak concepts from most recent answer
+        history = st.session_state.student_agent.session_data.get("questions_history", [])
+        if history:
+            last_eval = history[-1].get("evaluation", {})
+            latest_weak = last_eval.get("weak_concepts", [])
+            latest_missing = last_eval.get("missing_concepts", [])
+            
+            if latest_weak or latest_missing:
+                with st.expander("🆕 From Your Last Answer", expanded=True):
+                    if latest_weak:
+                        st.write("**Struggled With:**")
+                        for concept in latest_weak[:5]:
+                            st.write(f"🔴 {concept}")
+                    if latest_missing:
+                        st.write("**Should Have Used:**")
+                        for concept in latest_missing[:5]:
+                            st.write(f"🔵 {concept}")
+        
+        # Show accumulated weak topics (most frequent)
         weak_topics = st.session_state.student_agent.get_weak_topics()
+        
+        # Debug: Print what we're getting
+        print(f"\n📋 Sidebar - Retrieved Weak Topics:")
+        print(f"   Weak concepts count: {len(weak_topics.get('weak_concepts', {}))}")
+        print(f"   Concept gaps count: {len(weak_topics.get('concept_gaps', []))}")
         
         weak_concepts = weak_topics.get("weak_concepts", {})
         if weak_concepts:
-            st.write("**Weak Concepts:**")
-            for concept, data in list(weak_concepts.items())[:3]:
+            st.write("**Most Frequent Weak Concepts:**")
+            for concept, data in list(weak_concepts.items())[:5]:
                 occurrences = data.get("occurrences", 0)
                 st.write(f"🔴 {concept} (struggled {occurrences}x)")
+                print(f"   Displaying: {concept} ({occurrences}x)")
         
         concept_gaps = weak_topics.get("concept_gaps", [])
         if concept_gaps:
-            st.write("**Missing Concepts:**")
-            for concept in concept_gaps[:3]:
+            st.write("**All Missing Concepts:**")
+            for concept in concept_gaps[:5]:
                 st.write(f"🔵 {concept}")
+                print(f"   Displaying gap: {concept}")
         
         if not weak_concepts and not concept_gaps:
             st.success("No weak areas identified yet!")
+            print("   No weak areas to display")
         
         st.markdown("---")
         if st.button("End Session"):
@@ -245,7 +273,31 @@ else:
                             'evaluation': evaluation
                         })
                         
-                        # Display evaluation feedback
+                        # Print grading report to terminal for debugging
+                        print("\n" + "="*70)
+                        print("📊 GRADING REPORT")
+                        print("="*70)
+                        print(f"Problem ID: {question_data.get('problem_id')}")
+                        print(f"Score: {evaluation['score']}/100")
+                        print(f"Is Correct: {evaluation['is_correct']}")
+                        print(f"\nFeedback: {evaluation['feedback']}")
+                        print(f"\nExplanation: {evaluation.get('explanation', 'N/A')}")
+                        
+                        weak_concepts = evaluation.get('weak_concepts', [])
+                        missing_concepts = evaluation.get('missing_concepts', [])
+                        concept_understanding = evaluation.get('concept_understanding', {})
+                        
+                        if weak_concepts:
+                            print(f"\nWeak Concepts: {', '.join(weak_concepts)}")
+                        if missing_concepts:
+                            print(f"Missing Concepts: {', '.join(missing_concepts)}")
+                        if concept_understanding:
+                            print(f"\nConcept Understanding:")
+                            for concept, score in concept_understanding.items():
+                                print(f"  - {concept}: {score:.0%}")
+                        print("="*70 + "\n")
+                        
+                        # Display evaluation feedback in UI
                         if evaluation['is_correct']:
                              st.success(f"✅ Correct! Score: {evaluation['score']}/100")
                         else:
@@ -253,9 +305,17 @@ else:
                         
                         st.info(f"📝 **Feedback:** {evaluation['feedback']}")
                         
-                        # Display weak concepts identified from this answer
-                        weak_concepts = evaluation.get('weak_concepts', [])
-                        missing_concepts = evaluation.get('missing_concepts', [])
+                        # Display detailed grading report
+                        with st.expander("📊 Detailed Grading Report", expanded=True):
+                            st.markdown(f"**Score:** {evaluation['score']}/100")
+                            st.markdown(f"**Correctness:** {'✅ Correct' if evaluation['is_correct'] else '❌ Incorrect'}")
+                            st.markdown(f"**Explanation:** {evaluation.get('explanation', 'N/A')}")
+                            
+                            # Show concept understanding scores
+                            if concept_understanding:
+                                st.markdown("**Concept Understanding:**")
+                                for concept, score in concept_understanding.items():
+                                    st.progress(score, text=f"{concept}: {score:.0%}")
                         
                         if weak_concepts or missing_concepts:
                             with st.expander("⚠️ Concepts Needing Work", expanded=True):

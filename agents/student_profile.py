@@ -60,6 +60,18 @@ class StudentProfileAgent:
             try:
                 with open(self.user_data_path, 'r') as f:
                     self.session_data = json.load(f)
+                
+                # Ensure weak_concepts and concept_gaps exist (for backward compatibility)
+                if "weak_concepts" not in self.session_data:
+                    self.session_data["weak_concepts"] = {}
+                if "concept_gaps" not in self.session_data:
+                    self.session_data["concept_gaps"] = []
+                if "mastery_tracking" not in self.session_data:
+                    self.session_data["mastery_tracking"] = {
+                        "concepts": {},
+                        "subtopics": {},
+                        "overall_mastery": 0.0
+                    }
             except Exception as e:
                 print(f"Error loading user data: {e}")
         else:
@@ -341,14 +353,15 @@ Return ONLY the JSON object, nothing else."""
         # Update overall mastery to 0 since we're starting a new subtopic
         self.session_data["mastery_tracking"]["overall_mastery"] = 0.0
         
-        # Clear weak concepts and concept gaps for fresh start
-        self.session_data["weak_concepts"] = {}
-        self.session_data["concept_gaps"] = []
+        # DO NOT clear weak concepts - they should accumulate across all subtopics
+        # This allows the tutor to track persistent weak areas throughout learning
+        # self.session_data["weak_concepts"] = {}
+        # self.session_data["concept_gaps"] = []
         
         # Save the changes
         self._save_user_data()
         
         print(f"✅ Reset mastery score to 0 for subtopic: {subtopic}")
         print(f"   - Cleared all concept mastery scores")
-        print(f"   - Cleared weak concepts and gaps")
+        print(f"   - Preserving weak concepts tracking across subtopics")
         print(f"   - Starting fresh mastery tracking")

@@ -471,7 +471,8 @@ class KnowledgeGraphMasteryAgent:
                 lines.append(f"  Explanation: {attempt.explanation}")
             lines.append(f"  Timestamp: {attempt.timestamp}")
             lines.append("")
-        
+        print('###### Inside _prepare_detailed_attempt_history ######')
+        print("\n".join(lines))
         return "\n".join(lines)
     
     def _analyze_concept_coverage(self, subtopic_id: str, state: SubtopicMasteryState) -> str:
